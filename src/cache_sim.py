@@ -7,7 +7,20 @@ class CacheSimulator:
         self.seq = sequence
 
     def run_fifo(self):
-        pass # To be implemented in next commit
+        cache_set = set()
+        queue = deque()
+        misses = 0
+
+        for req in self.req:
+            if req not in cache_set:
+                misses += 1
+                if len(cache_set) == self.k:
+                    evicted = queue.popleft()
+                    cache_set.remove(evicted)
+                cache_set.add(req)
+                queue.append(req)
+        
+        return misses
 
     def run_lru(self):
         pass # To be implemented
