@@ -11,7 +11,7 @@ class CacheSimulator:
         queue = deque()
         misses = 0
 
-        for req in self.req:
+        for req in self.seq:
             if req not in cache_set:
                 misses += 1
                 if len(cache_set) == self.k:
