@@ -23,10 +23,51 @@ class CacheSimulator:
         return misses
 
     def run_lru(self):
-        pass # To be implemented
+        cache = OrderedDict()
+        misses = 0
+
+        for req in self.seq:
+            if req in cache:
+                cache.move_to_end(req)
+            else:
+                misses += 1
+                if len(cache) == self.k:
+                    cache.popitem(last=False)
+                cache[req] = True
+        
+        return misses
 
     def run_optff(self):
-        pass # Partner 2 will implement this
+        cache_set = set()
+        misses = 0
+        
+        future_occurrences = defaultdict(deque)
+        for i, req in enumerate(self.seq):
+            future_occurrences[req].append(i)
+
+        for i, req in enumerate(self.seq):
+            future_occurrences[req].popleft()
+            
+            if req not in cache_set:
+                misses += 1
+                if len(cache_set) == self.k:
+                    farthest_req = None
+                    farthest_idx = -1
+                    
+                    for item in cache_set:
+                        if not future_occurrences[item]:
+                            farthest_req = item
+                            break
+                        
+                        next_idx = future_occurrences[item][0]
+                        if next_idx > farthest_idx:
+                            farthest_idx = next_idx
+                            farthest_req = item
+                            
+                    cache_set.remove(farthest_req)
+                cache_set.add(req)
+                
+        return misses
 
 def main():
     if len(sys.argv) < 2:
@@ -46,7 +87,9 @@ def main():
     sequence = [int(x) for x in data[2:2+m]]
     
     sim = CacheSimulator(k, sequence)
-    print(f"Loaded cache with capacity {k} and {m} requests.")
+    print(f"FIFO  : {sim.run_fifo()}")
+    print(f"LRU   : {sim.run_lru()}")
+    print(f"OPTFF : {sim.run_optff()}")
 
 if __name__ == "__main__":
     main()
